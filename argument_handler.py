@@ -1,59 +1,122 @@
 import argparse
 
 
-# I want:
-
-# -help : for listing possible actions
-# -new -id -type? : for creating password
-# -id -type? : for updating a password
-# -get -id : for getting a password
-# -list : for listing ids
-# -list -passwords : for listing ids and passwords
- 
 class ArgumentHandler:
-    def __init__(self, help=False, new=False, id="", type="", get=False, list=False, passwords=False):
-        self.help = help
-        self.new = new
-        self.id = id
-        self.type = type
-        self.get = get
-        self.list = list
-        self.passwords = passwords
-        
+    def __init__(self):
+        """
+        Initializes the argument dictionary to store parsed argument values.
+        """
+        self.arguments = {
+            "help": False,
+            "new": {"id": None, "type": None},
+            "get": {"id": None},
+            "list": {"passwords": False},
+            "Error": None,  # Error messages or None if no error
+        }
+
     def handle_arguments(self):
-        
-        parser = argparse.ArgumentParser(description="Password Manager")
-        parser.add_argument("-help", action="store_true", help="List possible actions")
-        parser.add_argument("-new", action="store_true", help="Create a new password")
-        parser.add_argument("-id", type=str, help="The ID of the password to update")
-        parser.add_argument("-type", type=str, help="The type of the password to update")
-        parser.add_argument("-get", action="store_true", help="Get the password for the specified ID")
-        parser.add_argument("-list", action="store_true", help="List all IDs")
-        parser.add_argument("-passwords", action="store_true", help="List all IDs and passwords")
-        
+        """
+        Parses command-line arguments and populates the argument dictionary.
+        Ensures proper validation of required dependencies for each action.
+        Returns:
+            dict: The populated argument dictionary.
+        """
+        # Initialize the parser
+        parser = argparse.ArgumentParser(
+            description="Password Manager: A tool to manage your passwords with multiple options for creation, retrieval, and listing."
+        )
+
+        # Create a mutually exclusive group for the main actions
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument("-help", action="store_true",
+                           help="Display detailed help information about possible commands and their usage.")
+        group.add_argument("-new", action="store_true",
+                           help="Create a new password. Requires -id and optionally -type.")
+        group.add_argument("-get", action="store_true",
+                           help="Get a password by its ID. Requires -id.")
+        group.add_argument("-list", action="store_true",
+                           help="List all stored IDs. Use with -passwords to include passwords.")
+        group.add_argument("-passwords", action="store_true",
+                           help="List all stored IDs and their corresponding passwords.")
+
+        # Additional arguments
+        parser.add_argument(
+            "-id", type=str, help="Specify the ID for the action.")
+        parser.add_argument(
+            "-type", type=str, help="Specify the type of the password (e.g., email, banking).")
+
+        # Parse the arguments
         args = parser.parse_args()
-        
+
+        # Handle each action
         if args.help:
-            print("List of possible actions:")
-            print("-new: Create a new password")
-            print("-id: The ID of the password to update")
-            print("-type: The type of the password to update")
-            print("-get: Get the password for the specified ID")
-            print("-list: List all IDs")
-            print("-passwords: List all IDs and passwords")
+            self.arguments.update({"help": True})
+            print(
+                """
+Password Manager Help:
+
+Commands:
+  -help             Display this help message with detailed usage instructions.
+
+  -new              Create a new password. Requires the following:
+                      -id    (Required) The unique ID for the password.
+                      -type  (Optional) The type of the password (e.g., email, banking).
+
+  -get              Retrieve a password by ID. Requires:
+                      -id    (Required) The unique ID of the password to retrieve.
+
+  -list             List all stored IDs. Optional:
+                      -passwords   Include the corresponding passwords in the listing.
+
+  -passwords        List all stored IDs along with their passwords.
+
+Examples:
+  Create a new password:
+    python argument_handler.py -new -id my_email -type email
+
+  Retrieve a password:
+    python argument_handler.py -get -id my_email
+
+  List all IDs:
+    python argument_handler.py -list
+
+  List all IDs with passwords:
+    python argument_handler.py -list -passwords
+"""
+            )
+
         elif args.new:
-            print("Creating a new password...")
-        elif args.id:
-            print(f"Updating password with ID {args.id}...")
+            if not args.id:
+                self.arguments.update(
+                    {"Error": "Creating a new password requires the -id argument."})
+            else:
+                self.arguments["new"].update(
+                    {"id": args.id, "type": args.type or "default"})
+                if args.type and args.type != "no_special_chars":
+                    self.arguments.update(
+                        {"Error": "Invalid password type. Use 'no_special_chars' for a password without special characters."})
+
         elif args.get:
-            print(f"Getting password for ID {args.get}...")
+            if not args.id:
+                self.arguments.update(
+                    {"Error": "Getting a password requires the -id argument."})
+            else:
+                self.arguments["get"].update({"id": args.id})
+
         elif args.list:
-            print("Listing all IDs...")
+            self.arguments["list"].update({"passwords": args.passwords})
+
         elif args.passwords:
-            print("Listing all IDs and passwords...")
+            self.arguments["list"].update({"passwords": True})
+
         else:
-            print("No valid arguments provided. Use -help to see the list of possible actions.")
-        
+            self.arguments.update(
+                {"Error": "No valid arguments provided. Use -help to see the list of possible actions."})
+
+        return self.arguments
+
+
 if __name__ == "__main__":
     handler = ArgumentHandler()
-    handler.handle_arguments()
+    result = handler.handle_arguments()
+    print(result)  # Prints the JSON-like dictionary
