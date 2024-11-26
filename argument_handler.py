@@ -8,9 +8,10 @@ class ArgumentHandler:
         """
         self.arguments = {
             "help": False,
-            "new": {"id": None, "type": None},
-            "get": {"id": None},
-            "list": {"passwords": False},
+            "new": {"id": None, "type": None, "seed": None},
+            "get": {"id": None, "all": None},
+            "update": {"id": None, "type": None, "seed": None},
+            "upload": False,
             "Error": None,  # Error messages or None if no error
         }
 
@@ -23,7 +24,7 @@ class ArgumentHandler:
         """
         # Initialize the parser
         parser = argparse.ArgumentParser(
-            description="Password Manager: A tool to manage your passwords with multiple options for creation, retrieval, and listing."
+            description="Password Manager: A tool to manage your passwords with multiple options for creation, retrieval, and updating."
         )
 
         # Create a mutually exclusive group for the main actions
@@ -33,17 +34,26 @@ class ArgumentHandler:
         group.add_argument("-new", action="store_true",
                            help="Create a new password. Requires -id and optionally -type.")
         group.add_argument("-get", action="store_true",
-                           help="Get a password by its ID. Requires -id.")
-        group.add_argument("-list", action="store_true",
-                           help="List all stored IDs. Use with -passwords to include passwords.")
-        group.add_argument("-passwords", action="store_true",
-                           help="List all stored IDs and their corresponding passwords.")
+                           help="Get passwords. Requires -id for a specific password or -all for either IDs or passwords.")
+        group.add_argument("-upload", action="store_true",
+                           help="Upload to Google Drive the current passwords.")
+        group.add_argument("-update", action="store_true",
+                           help="Update a password. Requires -id and optionally -type.")
 
-        # Additional arguments
+        # Additional arguments for get, new, and update
         parser.add_argument(
-            "-id", type=str, help="Specify the ID for the action.")
+            "-id", type=str, help="Specify the ID for the action."
+        )
         parser.add_argument(
-            "-type", type=str, help="Specify the type of the password (e.g., email, banking).")
+            "-all", type=str, choices=["ids", "passwords"],
+            help="Retrieve all IDs or all passwords (used with -get). Choices: 'ids', 'passwords'."
+        )
+        parser.add_argument(
+            "-type", type=str, help="Specify if the password should have special characters."
+        )
+        parser.add_argument(
+            "-seed", type=str, help="Generate a password using a specific seed."
+        )
 
         # Parse the arguments
         args = parser.parse_args()
@@ -61,27 +71,38 @@ Commands:
   -new              Create a new password. Requires the following:
                       -id    (Required) The unique ID for the password.
                       -type  (Optional) The type of the password (e.g., email, banking).
+                      -seed  (Optional) A specific seed for generating the password.
 
-  -get              Retrieve a password by ID. Requires:
-                      -id    (Required) The unique ID of the password to retrieve.
+  -update           Update an existing password. Requires:
+                      -id    (Required) The unique ID of the password to update.
+                      -type  (Optional) The type of the new password.
+                      -seed  (Optional) A specific seed for generating the new password.
 
-  -list             List all stored IDs. Optional:
-                      -passwords   Include the corresponding passwords in the listing.
+  -get              Retrieve passwords. Requires one of the following:
+                      -id            (Retrieve the password for a specific ID).
+                      -all ids       (Retrieve all stored IDs).
+                      -all passwords (Retrieve all stored passwords).
 
-  -passwords        List all stored IDs along with their passwords.
+  -upload           Upload all passwords to Google Drive.
 
 Examples:
   Create a new password:
-    python argument_handler.py -new -id my_email -type email
+    python argument_handler.py -new -id my_email -type email -seed myseed
 
-  Retrieve a password:
+  Update an existing password:
+    python argument_handler.py -update -id my_email -type email -seed mynewseed
+
+  Retrieve a specific password:
     python argument_handler.py -get -id my_email
 
-  List all IDs:
-    python argument_handler.py -list
+  Retrieve all IDs:
+    python argument_handler.py -get -all ids
 
-  List all IDs with passwords:
-    python argument_handler.py -list -passwords
+  Retrieve all passwords:
+    python argument_handler.py -get -all passwords
+
+  Upload all passwords to Google Drive:
+    python argument_handler.py -upload
 """
             )
 
@@ -91,23 +112,30 @@ Examples:
                     {"Error": "Creating a new password requires the -id argument."})
             else:
                 self.arguments["new"].update(
-                    {"id": args.id, "type": args.type or "default"})
-                if args.type and args.type != "no_special_chars":
-                    self.arguments.update(
-                        {"Error": "Invalid password type. Use 'no_special_chars' for a password without special characters."})
+                    {"id": args.id, "type": args.type or "default", "seed": args.seed})
 
-        elif args.get:
+        elif args.update:
             if not args.id:
                 self.arguments.update(
-                    {"Error": "Getting a password requires the -id argument."})
+                    {"Error": "Updating a password requires the -id argument."})
             else:
+                self.arguments["update"].update(
+                    {"id": args.id, "type": args.type or "default", "seed": args.seed})
+
+        elif args.get:
+            if args.id and args.all:
+                self.arguments.update(
+                    {"Error": "Conflicting arguments: Use either -id or -all with -get, but not both."})
+            elif args.all:
+                self.arguments["get"].update({"all": args.all})
+            elif args.id:
                 self.arguments["get"].update({"id": args.id})
+            else:
+                self.arguments.update(
+                    {"Error": "Getting passwords requires either -id or -all."})
 
-        elif args.list:
-            self.arguments["list"].update({"passwords": args.passwords})
-
-        elif args.passwords:
-            self.arguments["list"].update({"passwords": True})
+        elif args.upload:
+            self.arguments.update({"upload": True})
 
         else:
             self.arguments.update(
