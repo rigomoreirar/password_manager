@@ -2,3 +2,4 @@
 .env
 __pycache__
 passwords.txt
+client_secret_*.json
