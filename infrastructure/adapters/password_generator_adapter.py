@@ -1,9 +1,8 @@
-import hashlib
+from domain.ports.password_generator_port import PasswordGeneratorPort
 import random
 import string
 
-
-class PasswordGenerator:
+class PasswordGeneratorAdapter(PasswordGeneratorPort):
     def __init__(self, seed=None, options="", length=15):
         self.seed = seed
         self.options = options
@@ -21,9 +20,3 @@ class PasswordGenerator:
                            for _ in range(self.length))
 
         return password
-
-
-if __name__ == "__main__":
-    seed = "my_secret_key"
-    test = PasswordGenerator(seed=seed)
-    print(test.generate_password())
