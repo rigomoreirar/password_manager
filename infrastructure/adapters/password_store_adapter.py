@@ -1,11 +1,11 @@
 from domain.ports.password_store_port import PasswordStorePort
-from domain.models.password_entry import PasswordEntry
+from domain.models.password_entry_model import PasswordEntryModel
 
 class PasswordStoreAdapter(PasswordStorePort):
     def __init__(self, file_path="passwords.txt"):
         self.file_path = file_path
 
-    def add_password(self, password_entry: PasswordEntry):
+    def add_password(self, password_entry: PasswordEntryModel):
         with open(self.file_path, "r") as f:
             lines = f.readlines()
             for line in lines:
@@ -17,7 +17,7 @@ class PasswordStoreAdapter(PasswordStorePort):
         with open(self.file_path, "a") as f:
             f.write(f"{password_entry.username}|{password_entry.password}\n")
 
-    def update_password(self, password_entry: PasswordEntry):
+    def update_password(self, password_entry: PasswordEntryModel):
         with open(self.file_path, "r") as f:
             lines = f.readlines()
 

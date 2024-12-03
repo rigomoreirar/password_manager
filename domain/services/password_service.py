@@ -1,6 +1,6 @@
 from ..ports.password_store_port import PasswordStorePort
 from ..ports.password_generator_port import PasswordGeneratorPort
-from ..models.password_entry import PasswordEntry
+from ..models.password_entry_model import PasswordEntryModel
 
 class PasswordService:
     def __init__(self, password_store: PasswordStorePort, password_generator: PasswordGeneratorPort):
@@ -9,13 +9,13 @@ class PasswordService:
 
     def create_password(self, username):
         password = self.password_generator.generate_password()
-        password_entry = PasswordEntry(username, password)
+        password_entry = PasswordEntryModel(username, password)
         self.password_store.add_password(password_entry)
         return password_entry
 
     def update_password(self, username):
         password = self.password_generator.generate_password()
-        password_entry = PasswordEntry(username, password)
+        password_entry = PasswordEntryModel(username, password)
         self.password_store.update_password(password_entry)
         return password_entry
 

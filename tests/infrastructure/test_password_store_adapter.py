@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import mock_open, patch
 from infrastructure.adapters.password_store_adapter import PasswordStoreAdapter
-from domain.models.password_entry import PasswordEntry
+from domain.models.password_entry_model import PasswordEntryModel
 
 class TestPasswordStoreAdapter(unittest.TestCase):
     def setUp(self):
@@ -15,7 +15,7 @@ class TestPasswordStoreAdapter(unittest.TestCase):
 
     @patch('builtins.open', new_callable=mock_open)
     def test_add_password(self, mock_file):
-        entry = PasswordEntry(username='user3', password='pass3')
+        entry = PasswordEntryModel(username='user3', password='pass3')
         self.adapter.add_password(entry)
         mock_file.assert_called_with('passwords.txt', 'a')
         handle = mock_file()
@@ -26,7 +26,7 @@ class TestPasswordStoreAdapter(unittest.TestCase):
         # Mock the read and write operations
         handle = mock_file()
         handle.readlines.return_value = ['user1|pass1\n', 'user2|pass2\n']
-        entry = PasswordEntry(username='user1', password='newpass')
+        entry = PasswordEntryModel(username='user1', password='newpass')
         self.adapter.update_password(entry)
         mock_file.assert_called_with('passwords.txt', 'w')
         handle.write.assert_any_call('user1|newpass\n')

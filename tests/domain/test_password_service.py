@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from domain.services.password_service import PasswordService
 from domain.ports.password_store_port import PasswordStorePort
 from domain.ports.password_generator_port import PasswordGeneratorPort
-from domain.models.password_entry import PasswordEntry
+from domain.models.password_entry_model import PasswordEntryModel
 
 class TestPasswordService(unittest.TestCase):
     def setUp(self):
@@ -25,7 +25,7 @@ class TestPasswordService(unittest.TestCase):
         result = self.service.create_password('test_user')
         
         # Assertions
-        self.assertIsInstance(result, PasswordEntry)
+        self.assertIsInstance(result, PasswordEntryModel)
         self.assertEqual(result.username, 'test_user')
         self.assertEqual(result.password, 'mocked_password')
         self.mock_password_generator.generate_password.assert_called_once()
@@ -39,7 +39,7 @@ class TestPasswordService(unittest.TestCase):
         result = self.service.update_password('test_user')
         
         # Assertions
-        self.assertIsInstance(result, PasswordEntry)
+        self.assertIsInstance(result, PasswordEntryModel)
         self.assertEqual(result.username, 'test_user')
         self.assertEqual(result.password, 'updated_password')
         self.mock_password_generator.generate_password.assert_called_once()
