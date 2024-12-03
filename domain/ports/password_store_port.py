@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
+from ..models.password_entry_model import PasswordEntryModel
 
 class PasswordStorePort(ABC):
     @abstractmethod
-    def add_password(self, username, password):
+    def add_password(self, PasswordEntry: PasswordEntryModel):
         pass
 
     @abstractmethod
-    def update_password(self, username, password):
+    def update_password(self, PasswordEntry: PasswordEntryModel):
         pass
 
     @abstractmethod

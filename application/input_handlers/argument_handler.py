@@ -1,26 +1,18 @@
 import argparse
-
+from domain.models.arguments_model import ArgumentsModel
 
 class ArgumentHandler:
     def __init__(self):
         """
-        Initializes the argument dictionary to store parsed argument values.
+        Initializes the ArgumentHandler with an empty ArgumentsModel.
         """
-        self.arguments = {
-            "help": False,
-            "new": {"username": None, "type": None, "seed": None},
-            "get": {"username": None, "all": None},
-            "update": {"username": None, "type": None, "seed": None},
-            "upload": False,
-            "Error": None,  # Error messages or None if no error
-        }
+        self.arguments = ArgumentsModel()
 
     def handle_arguments(self):
         """
-        Parses command-line arguments and populates the argument dictionary.
-        Ensures proper validation of required dependencies for each action.
+        Parses command-line arguments and populates the ArgumentsModel instance.
         Returns:
-            dict: The populated argument dictionary.
+            ArgumentsModel: The populated ArgumentsModel instance.
         """
         # Initialize the parser
         parser = argparse.ArgumentParser(
@@ -60,36 +52,37 @@ class ArgumentHandler:
 
         # Handle each action
         if args.help:
-            self.arguments.update({"help": True})
+            self.arguments.help = True
         elif args.new:
             if not args.username:
-                self.arguments.update(
-                    {"Error": "Creating a new password requires the -username argument."})
+                self.arguments.error = "Creating a new password requires the -username argument."
             else:
-                self.arguments["new"].update(
-                    {"username": args.username, "type": args.type or "default", "seed": args.seed})
+                self.arguments.new.update({
+                    "username": args.username,
+                    "type": args.type or "default",
+                    "seed": args.seed
+                })
         elif args.update:
             if not args.username:
-                self.arguments.update(
-                    {"Error": "Updating a password requires the -username argument."})
+                self.arguments.error = "Updating a password requires the -username argument."
             else:
-                self.arguments["update"].update(
-                    {"username": args.username, "type": args.type or "default", "seed": args.seed})
+                self.arguments.update.update({
+                    "username": args.username,
+                    "type": args.type or "default",
+                    "seed": args.seed
+                })
         elif args.get:
             if args.username and args.all:
-                self.arguments.update(
-                    {"Error": "Conflicting arguments: Use either -username or -all with -get, but not both."})
+                self.arguments.error = "Conflicting arguments: Use either -username or -all with -get, but not both."
             elif args.all:
-                self.arguments["get"].update({"all": args.all})
+                self.arguments.get["all"] = args.all
             elif args.username:
-                self.arguments["get"].update({"username": args.username})
+                self.arguments.get["username"] = args.username
             else:
-                self.arguments.update(
-                    {"Error": "Getting passwords requires either -username or -all."})
+                self.arguments.error = "Getting passwords requires either -username or -all."
         elif args.upload:
-            self.arguments.update({"upload": True})
+            self.arguments.upload = True
         else:
-            self.arguments.update(
-                {"Error": "No valid arguments provided. Use -help to see the list of possible actions."})
+            self.arguments.error = "No valid arguments provided. Use -help to see the list of possible actions."
 
         return self.arguments
