@@ -1,5 +1,5 @@
 class PasswordEntryModel:
-    def __init__(self, username, password, url):
+    def __init__(self, username, password, domain):
         self.username = username
         self.password = password
-        self.url = url
+        self.domain = domain

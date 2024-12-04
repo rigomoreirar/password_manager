@@ -37,7 +37,10 @@ class ArgumentHandler:
             "-username", type=str, help="Specify the username for the action."
         )
         parser.add_argument(
-            "-all", type=str, choices=["usernames", "passwords"],
+            "-domain", type=str, help="Specify the domain for the site which corresponds to the username."
+        )
+        parser.add_argument(
+            "-all", type=str, choices=["usernames", "passwords", "domains"],
             help="Retrieve all usernames or all passwords (used with -get). Choices: 'usernames', 'passwords'."
         )
         parser.add_argument(
