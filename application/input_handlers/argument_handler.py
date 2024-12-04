@@ -57,32 +57,46 @@ class ArgumentHandler:
         if args.help:
             self.arguments.help = True
         elif args.new:
-            if not args.username:
-                self.arguments.error = "Creating a new password requires the -username argument."
+            if not args.username or not args.domain:
+                if not args.username:
+                    self.arguments.error = "Creating a new password requires the -username argument."
+                if not args.domain:
+                    self.arguments.error = "Creating a new password requires the -domain argument."
             else:
                 self.arguments.new.update({
                     "username": args.username,
                     "type": args.type or "default",
-                    "seed": args.seed
+                    "seed": args.seed,
+                    "domain": args.domain
                 })
         elif args.update:
-            if not args.username:
-                self.arguments.error = "Updating a password requires the -username argument."
+            if not args.username or not args.domain:
+                if not args.username:
+                    self.arguments.error = "Updating a password requires the -username argument."
+                if not args.domain:
+                    self.arguments.error = "Updating a password requires the -domain argument."
             else:
                 self.arguments.update.update({
                     "username": args.username,
                     "type": args.type or "default",
-                    "seed": args.seed
+                    "seed": args.seed,
+                    "domain": args.domain
                 })
         elif args.get:
-            if args.username and args.all:
-                self.arguments.error = "Conflicting arguments: Use either -username or -all with -get, but not both."
+            if args.username and args.all or args.domain and args.all or args.username and args.domain and args.all:
+                self.arguments.error = "Conflicting arguments: Use either -domain, -username or -all with -get, but not both."
             elif args.all:
                 self.arguments.get["all"] = args.all
-            elif args.username:
-                self.arguments.get["username"] = args.username
+            elif args.username or args.domain:
+                if not args.domain:
+                    self.arguments.error = "Getting passwords from a single username requires the -domain argument."
+                elif not args.username:
+                    self.arguments.error = "Getting passwords from a single username with a corresponding domain requires the -username argument."
+                else:
+                    self.arguments.get["username"] = args.username
+                    self.arguments.get["domain"] = args.domain
             else:
-                self.arguments.error = "Getting passwords requires either -username or -all."
+                self.arguments.error = "Getting passwords requires either -domain, -username or -all."
         elif args.upload:
             self.arguments.upload = True
         else:
