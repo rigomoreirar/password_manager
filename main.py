@@ -29,6 +29,7 @@ def main():
         password_store = PasswordStoreAdapter()
         command = NewPasswordCommand(
             username=args.new.get("username"),
+            domain=args.new.get("domain"),
             password_generator=password_generator,
             password_store=password_store
         )
@@ -40,6 +41,7 @@ def main():
         password_store = PasswordStoreAdapter()
         command = UpdatePasswordCommand(
             username=args.update.get("username"),
+            domain=args.update.get("domain"),
             password_generator=password_generator,
             password_store=password_store
         )
@@ -47,6 +49,7 @@ def main():
         password_store = PasswordStoreAdapter()
         command = GetPasswordCommand(
             username=args.get.get("username"),
+            domain=args.get.get("domain"),
             all_option=args.get.get("all"),
             password_store=password_store
         )

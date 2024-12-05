@@ -17,6 +17,10 @@ class PasswordStorePort(ABC):
     @abstractmethod
     def get_all_usernames(self):
         pass
+    
+    @abstractmethod
+    def get_all_in_domain(self, domain):
+        pass
 
     @abstractmethod
     def get_all_passwords(self):
