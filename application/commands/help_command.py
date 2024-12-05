@@ -23,7 +23,7 @@ Commands:
                       -seed        (Optional) A specific seed for generating the new password.
 
   -get              Retrieve passwords. Requires one of the following:
-                      -doamin, -username   (Retrieve the passwords for a specific username in a domain).
+                      -domain, -username   (Retrieve the passwords for a specific username in a domain).
                       -all domain          (Retrieve all stored usernames and paddwords which correspond to the domain).
                       -all usernames       (Retrieve all stored usernames and their respective domains).
                       -all passwords       (Retrieve all stored passwords, usernames, and domains).
