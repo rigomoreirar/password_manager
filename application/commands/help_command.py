@@ -1,6 +1,5 @@
 from .base_command import BaseCommand
 
-
 class HelpCommand(BaseCommand):
     def execute(self):
         print(
@@ -15,6 +14,8 @@ Commands:
                       -username  (Required) The unique username for the password.
                       -type      (Optional) The type of the password (e.g., email, banking).
                       -seed      (Optional) A specific seed for generating the password.
+                      -extra_id  (Optional) An extra identifier for cases when an extra ID is needed.
+                      -password  (Optional) An already existing password to add to the password store.
 
   -update           Update an existing password. Requires:
                       -domain      (required) The domain for the site which corresponds to the username.
@@ -24,9 +25,9 @@ Commands:
 
   -get              Retrieve passwords. Requires one of the following:
                       -domain, -username   (Retrieve the passwords for a specific username in a domain).
-                      -all domain          (Retrieve all stored usernames and paddwords which correspond to the domain).
-                      -all usernames       (Retrieve all stored usernames and their respective domains).
-                      -all passwords       (Retrieve all stored passwords, usernames, and domains).
+                      -all domain          (Retrieve all stored usernames, extra_id and passwords which correspond to the domain).
+                      -all usernames       (Retrieve all stored usernames, extra_id and their respective domains).
+                      -all passwords       (Retrieve all stored passwords, usernames, extra_ids and domains).
 
   -upload           Upload all passwords to Google Drive.
   
@@ -34,6 +35,9 @@ Commands:
 Examples:
   Create a new password:
     python argument_handler.py -new -domain example.com -username my_email -type email -seed myseed
+
+  Create a new password with extra ID and existing password:
+    python argument_handler.py -new -domain example.com -username my_email -extra_id my_extra_id -password my_existing_password
 
   Update an existing password:
     python argument_handler.py -update -domain example.com -username my_email -type email -seed mynewseed
