@@ -31,7 +31,9 @@ def main():
             username=args.new.get("username"),
             domain=args.new.get("domain"),
             password_generator=password_generator,
-            password_store=password_store
+            password_store=password_store,
+            extra_id=args.new.get("extra_id"),  
+            password=args.new.get("password")   
         )
     elif args.update.get("username"):
         password_generator = PasswordGeneratorAdapter(
