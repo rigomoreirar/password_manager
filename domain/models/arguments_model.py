@@ -6,7 +6,6 @@ class ArgumentsModel:
             "type": None,
             "seed": None,
             "domain": None,
-            "extra_id": None,  
             "password": None   
         }
         self.get = get or {"username": None, "all": None, "domain": None}
