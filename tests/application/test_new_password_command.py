@@ -58,6 +58,10 @@ class TestNewPasswordCommand(unittest.TestCase):
         mock_print.assert_any_call("Password stored successfully for username: test_user.")
 
     def test_execute_exception(self):
+        
+         # Set password to None to force the use of create_password()
+        self.command.password = None
+    
         # Setup the mock password service to raise an exception
         self.mock_password_service.create_password.side_effect = Exception('Test exception')
         
