@@ -13,6 +13,7 @@ This project started as a simple script to manage passwords but evolved into a r
 - [Architecture](#architecture)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Adding the Password Manager to PATH](#adding-the-password-manager-to-path)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
 - [License](#license)
@@ -126,6 +127,24 @@ python main.py
 #### Password Generator
 - Generates random passwords of a specified length.
 - Custom generators can be implemented by following the `PasswordGenerator` interface.
+
+---
+
+## Adding the Password Manager to PATH
+To run the password manager from any directory in your command prompt, you can create a batch file and add it to your system PATH on Windows.
+
+### Steps
+
+1. **Create a Batch File:**
+    - Create a new file named `password_manager.bat` (or any name you like)
+    - Place the code described in `password_manager.txt` into the file
+
+2. **Move the Batch File to a Directory in PATH:**
+    - Go to your `Enviromental Varibles` if using Windows. If not using windows, raise LookForHelpElsewhere( IdontKnowHow2Help Sorry )
+    - Add directory to PATH
+
+3. **Test the Command:**
+    - Try running `password_manager -help` it should work 👌
 
 ---
 
