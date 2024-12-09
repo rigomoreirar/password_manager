@@ -26,3 +26,6 @@ class PasswordStorePort(ABC):
     def get_all_passwords(self):
         pass
 
+    @abstractmethod
+    def delete_password(self, PasswordEntry: PasswordEntryModel):
+        pass

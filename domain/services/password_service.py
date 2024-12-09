@@ -35,3 +35,9 @@ class PasswordService:
 
     def retrieve_all_passwords(self):
         return self.password_store.get_all_passwords()
+    
+    def delete_password(self, username, domain):
+        password = "Deleting Password"
+        password_entry = PasswordEntryModel(username, password, domain)
+        self.password_store.delete_password(password_entry)
+        return password_entry
