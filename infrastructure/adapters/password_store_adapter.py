@@ -74,3 +74,20 @@ class PasswordStoreAdapter(PasswordStorePort):
             lines = f.readlines()
 
         return [{"username": line.strip().split("|")[0], "password": line.strip().split("|")[1], "domain": line.strip().split("|")[2]} for line in lines]
+    
+    def delete_password(self, password_entry: PasswordEntryModel):
+        deleted = False
+        with open(self.file_path, "r") as f:
+            lines = f.readlines()
+
+        with open(self.file_path, "w") as f:
+            for line in lines:
+                stored_username, stored_password, stored_domain = line.strip().split("|")
+                if stored_username == password_entry.username and stored_domain == password_entry.domain:
+                    deleted = True
+                else:
+                    f.write(line)
+
+        if not deleted:
+            raise ValueError(
+                f"Username '{password_entry.username}' with domain '{password_entry.domain}' not found in the store.")
