@@ -25,3 +25,4 @@ class PasswordStorePort(ABC):
     @abstractmethod
     def get_all_passwords(self):
         pass
+

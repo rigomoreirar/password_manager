@@ -41,6 +41,7 @@ class ArgumentHandler:
         parser.add_argument("-all", type=str, choices=["usernames", "passwords", "domain"], help="Retrieve all usernames or all passwords (used with -get). Choices: 'usernames', 'passwords', 'domain'.")
         parser.add_argument("-type", type=str, help="Specify if the password should have special characters.")
         parser.add_argument("-seed", type=str, help="Generate a password using a specific seed.")
+        parser.add_argument("-password", type=str, help="An already existing password to add to the password store.")
 
         return parser
 
@@ -79,7 +80,8 @@ class ArgumentHandler:
                 "username": args.username,
                 "type": args.type or "default",
                 "seed": args.seed,
-                "domain": args.domain
+                "domain": args.domain,
+                "password": args.password
             })
 
     def _handle_update(self, args):

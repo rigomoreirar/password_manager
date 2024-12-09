@@ -35,7 +35,7 @@ class TestGetPasswordCommand(unittest.TestCase):
         
         # Assertions
         self.mock_password_service.retrieve_password.assert_called_once_with('test_user', 'test_domain')
-        mock_print.assert_any_call("Retrieving password for username: test_user.")
+        mock_print.assert_any_call("Retrieving password for username: test_user. In domain: test_domain.")
         mock_print.assert_any_call("Password for username 'test_user': mocked_password")
 
     def test_execute_retrieve_all_usernames(self):
@@ -57,7 +57,10 @@ class TestGetPasswordCommand(unittest.TestCase):
         # Setup the command to retrieve all passwords
         self.command.username = None
         self.command.all_option = "passwords"
-        self.mock_password_service.retrieve_all_passwords.return_value = ['password1', 'password2']
+        self.mock_password_service.retrieve_all_passwords.return_value = [
+            {"username": "user1", "password": "pass1", "domain": "domain1"},
+            {"username": "user2", "password": "pass2", "domain": "domain2"}
+        ]
         
         # Capture the output
         with patch('builtins.print') as mock_print, patch('pprint.pprint') as mock_pprint:
@@ -66,7 +69,31 @@ class TestGetPasswordCommand(unittest.TestCase):
         # Assertions
         self.mock_password_service.retrieve_all_passwords.assert_called_once()
         mock_print.assert_any_call("Retrieving all passwords.")
-        mock_pprint.assert_any_call({"All Passwords": ['password1', 'password2']})
+        mock_pprint.assert_any_call({"All Passwords": [
+            {"username": "user1", "password": "pass1", "domain": "domain1"},
+            {"username": "user2", "password": "pass2", "domain": "domain2"}
+        ]})
+
+    def test_execute_retrieve_all_in_domain(self):
+        # Setup the command to retrieve all usernames and passwords in a domain
+        self.command.username = None
+        self.command.all_option = "domain"
+        self.mock_password_service.retrieve_all_in_domain.return_value = [
+            {"username": "user1", "password": "pass1"},
+            {"username": "user2", "password": "pass2"}
+        ]
+        
+        # Capture the output
+        with patch('builtins.print') as mock_print, patch('pprint.pprint') as mock_pprint:
+            self.command.execute()
+        
+        # Assertions
+        self.mock_password_service.retrieve_all_in_domain.assert_called_once_with('test_domain')
+        mock_print.assert_any_call("Retrieving all usernames and passwords in domain: test_domain.")
+        mock_pprint.assert_any_call({"All Usernames and passwords in Domain": [
+            {"username": "user1", "password": "pass1"},
+            {"username": "user2", "password": "pass2"}
+        ]})
 
     def test_execute_invalid_command(self):
         # Setup the command with invalid options
@@ -90,7 +117,7 @@ class TestGetPasswordCommand(unittest.TestCase):
         
         # Assertions
         self.mock_password_service.retrieve_password.assert_called_once_with('test_user', 'test_domain')
-        mock_print.assert_any_call("Retrieving password for username: test_user.")
+        mock_print.assert_any_call("Retrieving password for username: test_user. In domain: test_domain.")
         mock_print.assert_any_call("An error occurred: Test exception")
 
 if __name__ == '__main__':

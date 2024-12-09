@@ -12,6 +12,11 @@ class PasswordService:
         password_entry = PasswordEntryModel(username, password, domain)
         self.password_store.add_password(password_entry)
         return password_entry
+    
+    def add_existing_password(self, username, password, domain):
+        password_entry = PasswordEntryModel(username, password, domain)
+        self.password_store.add_password(password_entry)
+        return password_entry
 
     def update_password(self, username, domain):
         password = self.password_generator.generate_password()

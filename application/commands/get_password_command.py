@@ -12,7 +12,7 @@ class GetPasswordCommand(BaseCommand):
     def execute(self):
         try:
             if self.username:
-                print(f"Retrieving password for username: {self.username}.")
+                print(f"Retrieving password for username: {self.username}. In domain: {self.domain}.")
                 password = self.password_service.retrieve_password(self.username, self.domain)
                 print(f"Password for username '{self.username}': {password}")
             elif self.all_option == "domain":
