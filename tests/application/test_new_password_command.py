@@ -4,6 +4,7 @@ from application.commands.new_password_command import NewPasswordCommand
 from domain.services.password_service import PasswordService
 from domain.models.password_entry_model import PasswordEntryModel
 
+
 class TestNewPasswordCommand(unittest.TestCase):
     def setUp(self):
         # Mock the password generator and store
@@ -11,8 +12,10 @@ class TestNewPasswordCommand(unittest.TestCase):
         self.mock_password_store = MagicMock()
         
         # Patch the PasswordService to use the mocks
-        self.password_service_patch = patch('application.commands.new_password_command.PasswordService')
-        self.mock_password_service_class = self.password_service_patch.start()
+        patcher = patch('application.commands.new_password_command.PasswordService')
+        self.mock_password_service_class = patcher.start()
+        self.addCleanup(patcher.stop)
+        
         self.mock_password_service = MagicMock(spec=PasswordService)
         self.mock_password_service_class.return_value = self.mock_password_service
         
@@ -26,26 +29,34 @@ class TestNewPasswordCommand(unittest.TestCase):
         )
 
     def tearDown(self):
-        self.password_service_patch.stop()
+        # This is handled by addCleanup in setUp, so it's optional
+        pass
 
     def test_execute_success_with_existing_password(self):
         # Setup the mock password service
-        self.mock_password_service.add_existing_password = MagicMock(return_value=PasswordEntryModel('test_user', 'existing_password', 'test_domain'))
+        password_entry = PasswordEntryModel(username='test_user', password='existing_password', domain='test_domain')
+        self.mock_password_service.add_existing_password.return_value = password_entry
         
         # Capture the output
         with patch('builtins.print') as mock_print:
             self.command.execute()
         
         # Assertions
-        self.mock_password_service.add_existing_password.assert_called_once_with('test_user', 'test_domain', 'existing_password')
+        self.mock_password_service.add_existing_password.assert_called_once()
+        args, kwargs = self.mock_password_service.add_existing_password.call_args
+        self.assertEqual(args[0].username, 'test_user')
+        self.assertEqual(args[0].password, 'existing_password')
+        self.assertEqual(args[0].domain, 'test_domain')
+        
         mock_print.assert_any_call("Creating a new password for username: test_user. In domain: test_domain.")
-        mock_print.assert_any_call("Added existing password: PasswordEntryModel(username='test_user', password='existing_password', domain='test_domain')")
+        mock_print.assert_any_call(f"Added existing password: {password_entry}")
         mock_print.assert_any_call("Password stored successfully for username: test_user.")
 
     def test_execute_success_with_generated_password(self):
         # Setup the command without existing password
         self.command.password = None
-        self.mock_password_service.create_password = MagicMock(return_value=PasswordEntryModel('test_user', 'mocked_password', 'test_domain'))
+        generated_password_entry = PasswordEntryModel(username='test_user', password='mocked_password', domain='test_domain')
+        self.mock_password_service.create_password.return_value = generated_password_entry
         
         # Capture the output
         with patch('builtins.print') as mock_print:
@@ -54,12 +65,11 @@ class TestNewPasswordCommand(unittest.TestCase):
         # Assertions
         self.mock_password_service.create_password.assert_called_once_with('test_user', 'test_domain')
         mock_print.assert_any_call("Creating a new password for username: test_user. In domain: test_domain.")
-        mock_print.assert_any_call("Generated password: PasswordEntryModel(username='test_user', password='mocked_password', domain='test_domain')")
+        mock_print.assert_any_call(f"Generated password: {generated_password_entry}")
         mock_print.assert_any_call("Password stored successfully for username: test_user.")
 
     def test_execute_exception(self):
-        
-         # Set password to None to force the use of create_password()
+        # Set password to None to force the use of create_password()
         self.command.password = None
     
         # Setup the mock password service to raise an exception
