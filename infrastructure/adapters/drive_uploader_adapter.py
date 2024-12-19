@@ -4,53 +4,65 @@ from pydrive.drive import GoogleDrive
 import os
 import dotenv
 
-dotenv.load_dotenv()
 
 class DriveUploaderAdapter(FileUploaderPort):
     def __init__(self):
+        dotenv.load_dotenv()
+        
         self.gauth = GoogleAuth()
-        client_secrets_name = os.getenv(
-            "CLIENT_SECRET_NAMEFILE", "client_secrets.json")
+        
+        self.client_secret_file_path = os.getenv("PATH_TO_CLIENT_SECRET")
+        self.client_secret_namefile = os.getenv("CLIENT_SECRET_NAMEFILE")
+        self.password_file_name = os.getenv("PASSWORD_FILE_NAME")
 
-        if not os.path.exists(client_secrets_name):
+        if not self.client_secret_file_path or not self.client_secret_namefile:
+            raise ValueError("Environment variables for client_secret file path and name are not set.")
+
+        # Construct the full path to the client secret file
+        self.file_path = os.path.join(self.client_secret_file_path, self.client_secret_namefile)
+        
+        if not os.path.exists(self.file_path):
             raise FileNotFoundError(
-                f"'{client_secrets_name}' not found in {os.getcwd()}.")
+                f"'{self.file_path}' not found in {os.getcwd()}.")
 
-        self.gauth.LoadClientConfigFile(client_secrets_name)
+        self.gauth.LoadClientConfigFile(self.file_path)
         self.gauth.LocalWebserverAuth()
         self.drive = GoogleDrive(self.gauth)
 
-    def upload_file(self, file_path, folder_name):
-        folder_query = f"title='{folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
+    def upload_file(self, drive_foldel_name):
+        # Define the name of the file we intend to upload
+        file_name = self.password_file_name
+        
+        # Search for the folder on Google Drive
+        folder_query = f"title='{drive_foldel_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
         folder_list = self.drive.ListFile({'q': folder_query}).GetList()
 
         if folder_list:
             folder_id = folder_list[0]['id']
         else:
             folder_metadata = {
-                'title': folder_name,
+                'title': drive_foldel_name,
                 'mimeType': 'application/vnd.google-apps.folder'
             }
             folder = self.drive.CreateFile(folder_metadata)
             folder.Upload()
             folder_id = folder['id']
 
-        file_name = os.path.basename(file_path)
+        # Check if the file already exists in the target folder
         file_query = f"title='{file_name}' and '{folder_id}' in parents and trashed=false"
         existing_files = self.drive.ListFile({'q': file_query}).GetList()
 
         if existing_files:
             existing_file = existing_files[0]
             existing_file.Delete()
-            print(
-                f"Existing file '{file_name}' deleted from folder '{folder_name}'.")
+            print(f"Existing file '{file_name}' deleted from folder '{drive_foldel_name}'.")
 
+        # Upload the new file to the folder
         file_metadata = {
             'title': file_name,
             'parents': [{'id': folder_id}]
         }
         file = self.drive.CreateFile(file_metadata)
-        file.SetContentFile(file_path)
+        file.SetContentFile(self.file_path)
         file.Upload()
-        print(
-            f"File '{file_name}' successfully uploaded to folder '{folder_name}'.")
+        print(f"File '{file_name}' successfully uploaded to folder '{drive_foldel_name}'.")
