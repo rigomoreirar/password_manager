@@ -11,21 +11,24 @@ class DriveUploaderAdapter(FileUploaderPort):
         
         self.gauth = GoogleAuth()
         
-        self.client_secret_file_path = os.getenv("PATH_TO_CLIENT_SECRET")
+        self.client_secret_path = os.getenv("PATH_TO_CLIENT_SECRET")
         self.client_secret_namefile = os.getenv("CLIENT_SECRET_NAMEFILE")
         self.password_file_name = os.getenv("PASSWORD_FILE_NAME")
 
-        if not self.client_secret_file_path or not self.client_secret_namefile:
+        if not self.client_secret_path or not self.client_secret_namefile:
             raise ValueError("Environment variables for client_secret file path and name are not set.")
 
         # Construct the full path to the client secret file
-        self.file_path = os.path.join(self.client_secret_file_path, self.client_secret_namefile)
+        self.client_secret_file_path = os.path.join(self.client_secret_path, self.client_secret_namefile)
         
-        if not os.path.exists(self.file_path):
+        # Construct the full path to the password file
+        self.password_file_path = os.path.join(self.client_secret_path, self.password_file_name)
+        
+        if not os.path.exists(self.client_secret_file_path):
             raise FileNotFoundError(
-                f"'{self.file_path}' not found in {os.getcwd()}.")
+                f"'{self.client_secret_file_path}' not found in {os.getcwd()}.")
 
-        self.gauth.LoadClientConfigFile(self.file_path)
+        self.gauth.LoadClientConfigFile(self.client_secret_file_path)
         self.gauth.LocalWebserverAuth()
         self.drive = GoogleDrive(self.gauth)
 
@@ -63,6 +66,6 @@ class DriveUploaderAdapter(FileUploaderPort):
             'parents': [{'id': folder_id}]
         }
         file = self.drive.CreateFile(file_metadata)
-        file.SetContentFile(self.file_path)
+        file.SetContentFile(self.password_file_path)
         file.Upload()
         print(f"File '{file_name}' successfully uploaded to folder '{drive_foldel_name}'.")
